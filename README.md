@@ -158,6 +158,42 @@ updates our tables
        ~not sure about this section, will have to revisit~ but essentially using post/get to push data to fastapi so it appears onsite 
 
 
-23. Celery, Redits + Basic Task Offload 
+23. Celery, Redits + Basic Task Offload
 
+    Python Celery - tasks queue (menchamism to distribute work across threads or machines)
+                  - Celery communicates via messages, usually using a broker to mediate between clients and workers.
+                  - To initiate a task the client adds a message to the queue, the broker then delivers that message to a worker.
+
+                  *Tasks* are a unit of work that needs to be executed asynschronously. They can be defined as regular Python functions or methods and are typically decorated with 
+                  "celery.tasks"
+
+                   Celery uses a message broker to pass messages between producer and consumer.(message brokers include Kafka, RabbitMQ and Redis)
+
+                  A Celery worker is a process that runs on a machine and exectutes the tasks. Workers connect to the message broker and wait for tasks to be assigned to them.
+                  Multiple workers can be running simulatenously, allowing for parallel processing and scalability.
+
+                  Result Backend - store and retrieve task results - it allows the prodcuer to check the status and obtain the results of completed tasks. (SQL DB, Redis or 
+                  Memcached)
+
+                  Celery also provides scheduling functionality through the use of schedulers, such as Celery Beat. 
+
+    
+    Redis - key value store , in memory cache - will help with Celery
+
+    Run Redis using Docker (docker run -it --rm -p 6379:6379 redis)v - make sure to keep this running to stay connected with redis 
+
+    Once Redis is up, you can add the url to the .env file and configure it in config.py
+
+
+25. Create worker.py app to start Celery process
+     - Here we'll run our tasks
+   
+     - WE can run our tasks by calling celery -app <location> (ie. app.worker.celery_app) worker --loglevel INFO ..  from the command line
+
+26. Connect Celery to Astra Db by importing settings
+     - we'll need to registr the connections and sync the tables again - we use "beat_init" and "worker_process_init" - double check what these are
+   
+27. Set up Periodic Tasks
+
+2:23 - https://www.youtube.com/watch?v=NyDT3KkscSk&t=6258s 
 
