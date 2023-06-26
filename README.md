@@ -1,0 +1,163 @@
+1. Location:
+  dev/cassandra_project
+2. source cassandra-proj/bin/activate
+
+
+# Understanding the scenario:
+
+An exercise in NoSQL practices and developing a data pipeline to a web application service for future analytics/use.
+
+What I want to learn:
+  - Apache Cassandra and validating data using pydantic and Astra DB.
+
+  - Automating web scraping service with Redis & Astra DB.'
+
+  - An exercise in good code practice, utilizing tools such as type hints + advanced features like decorators 
+
+  - Exercise in good documentation
+
+## Apache Cassandra
+
+- Settin up with AstraDB, creating a database "fastapi_db" with a keyscape called "scraper_app"  - let it provision.
+- Generate a token to connect your machine to DB
+
+## About Pydantic: 
+
+Pydantic is a Python library designed to validate data using Python type annotations. The library enforces type hints
+at runtime, and provides user friendly errors when data is invavlid. 
+
+Data validation is the practice of checking the integrity, accuracy and structure of data before it is used for a business operation.
+
+In doing so, we are enforcing a schema-on-write format - (explain) 
+
+## Using Decorators: 
+
+
+1. Scrape data from website
+2. Validate data using pydantic
+3. Add to DB 
+4. Integrate with FastAPI for front-end
+
+
+
+1. Create AstraBD cluster with keyspace. Go into directory folder and create a ".env" file to manage environment variables.
+     - make sure .env is in /gitignore so that when you upload, people don't have access to your db
+
+2. Generate token from Astra DB and put into .env file to connect 
+
+3. Download the cassandra driver for Python on Astra DB (should be in requirements.txt)
+
+4. Configure Cassandra Driver
+
+    We want to confiure the driver so that they are two functions that can be used with the Fast API (26:14) 
+    We use the instructions from the link below to get the cluster and session 
+   - https://astra.datastax.com/org/be48cd66-d055-42fd-a6ca-35ca70b3ccdf/database/1c6d0f94-dce6-4137-a68d-c95ba3b399c1/connect 
+
+5. Now we want to build or data models for Cassandra using Python dataclasses (ORM). 
+  ORM is a programming technique that allows developers to map objects from an object-oriented programming language, like Python, 
+  to a relational database, such as Cassandra.
+
+  - A basic data model, defining primary keys and schemas 
+
+6. We then create a CRUD (create, retrieve, update, delete) file that allows us to run certain commands on our db.
+
+   We first need to sync the table, which create or update a table in Cassandra based on the definition of a corresponding Python class representing the data model.
+   It automatically generates the necessary CQL (Cassandra Query Language) statements to create or alter the table schema.
+
+  If it already exists, any changes in the class definition, such as adding or modifying columns, will be applied to the table schema.
+
+7. Note: with Cassandra, you can change the schema of a model by just adding/removing columns from the python class
+    - crud operations will still work as expected - with forward and backward compability
+        - helps that we sync table for updates
+
+8. We want to create a scrape event with a synthetic primary key - uuid - so that we aren't overwriting our entries when syncing, but appending instead 
+
+  So we create a ProductScrapeEvent() class in our models - specifying the uuid as PK, indexing asin too because we want to search off that.
+
+  We also update crud.py so that we're adding a uuid field and returning the whole data dict 
+
+9. In crud.py, we create an add_scrape_event() function that checks if the data is new, then calls create_entry and
+    create_scrape_entry that inserts both the metadata and the entry with UUID. 
+
+10. Instead of doing all this in the command line, we can package our scraping events in a Jupyer Notebook
+      - folder "nbs" 
+
+11. In Jupyer, we're demonstrating how we can show different versions of the product scrape using the fresh = True (this produces a deep copy, which is a way to duplicate the dictionary)
+    and iterating through all of our entries in the Product table - so a product with the same asin being scrapped multiple times
+
+Note: Also, instead of using programming language to execute db commands (Product.objects.all()) you can run session.execute('SELECT etc') from CLQ Engine
+
+12. Now we begin using pydantic to implement some data validation to ensure that the data coming in is correct 
+
+    - The primary means of defining objects in pydantic is via models (models are simply classes which inherit from BaseModel)
+    - You can think of models as similar to types in strictly types languages, or as the requirements of a single endpoint in an API. 
+    - Untrusted data can be passed to a model, and after parsing and validation pydantic guarantees that the fields of the resultant model
+      instance will conform to the field types defined in the model.
+
+      When you define a data model as a subclass of BaseModel, you can specify the fields and their types, validation rules, default values, and other metdata
+      When you pass a subclass through BaseModel, Pydantic will automatically validate the data against the specified types and constraints, raising validation errors if the data does not match the defined model.
+
+  Pydantic allows for data validation but also omitting any fields that were not specified in the base model.
+
+  In this case, a BaseModel is basically a schema we are enforcing on our input - hence change in naming convention from ProductBaseModel to ProductSchema 
+
+13. Create a schema.py file --> where we store our pydantic schema validation classes:
+        Hint: we can use try and except statements to validate our data, import ValidationError from pydantic to print out error message in python
+        i.e. 
+    try:
+        schema.ProductScrapeEventSchema(**data)
+
+    except ValidationError as e:
+        print(e.json())
+
+14. Now that we've created our models and schemas - if we want to add a column, we need to update it in two places - our model and our schema 
+
+
+Note: fastapi was designed to use pydantic as a validation tool
+
+15. Time to implement the FastAPI:
+
+  create a main.py file
+
+  What is FastAPI?
+     - FastAPI is a modern web framework for building APIs with Python based on standard Python type hints
+     - FastAPI incorporates pydantic 
+
+We can start our webserver using uvicorn(Uvicorn is an ASGI web server implementation for Python) 
+with our app using this in terminal: "uvicorn app.main:app" whereby the latter app is the FaastAPI variable defined in main.py
+
+16. This is where we create our config.py file and import BaseSettings from pydantic so that our environment variables work with FastAPI.
+    We cache these settings using functools so that we don't keep calling it over and over again
+
+17. We import the environment settings into main.py 
+
+18. In main.py, we set up some routes and define a @app.on_event() decorator that, on start up, gets our db session and 
+updates our tables 
+
+19. We create a new route to /products where we list the Prodcuts.objets.all()
+
+    We can now choose to filter our data based on the schemas we defined - in our main.py file, for our route dedcorator,
+    we can use the parameter "response_model" = this is used to specify the model that will be used to validate  and parse
+    the response data received from an API endpoint or any other data source. 
+     Pydantic will automatically validate and parse the response data based on the specified model. 
+
+20. We can creatre more defined views based on specific schemas, like a view for a specific product based off the asin number 
+    - you can see different routes in the main.py file
+
+21. Next we can add a time stamp for all the entries
+    - For append only data, we tend to want to track the time it was collected - in this case
+      we use a gist (which is a way to share code snippets + clone /fork etc) that parses the datetime from the UUID field
+    - We create a 'Created' Field in our schema with the Optional [Any] tag for datetime
+
+    - Here we can further expand on validation techniques by calling the @root_validator technique in Pydantic that performs additinoa validation before it is validated agaist the model's fields. 
+
+    - Within root validator, you can perform custom validation or transformations on the 'values' dictionary - you can modify values, add additional fields, or raise validation errors ifnecessary.
+
+
+22. Next we create an endpoint to scrape data and send it to FastAPI and AstraDB
+       ~not sure about this section, will have to revisit~ but essentially using post/get to push data to fastapi so it appears onsite 
+
+
+23. Celery, Redits + Basic Task Offload 
+
+
