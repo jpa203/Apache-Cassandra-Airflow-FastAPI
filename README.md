@@ -1,4 +1,4 @@
-# Apache-Cassandra-Airflow-FastAPI
+# Cassandra, Redis, Celery, Selenium, FastAPI
 A NoSQL project using Apache Cassandra, Python, FastAPI, Redis, Selenium and Celery. 
 
 This project was an exercise in understanding the Apache Cassandra NoSQL database and its properties, as well as integration with the FastAPI framework, webscraping and task scheduling using Celery and Selenium.
