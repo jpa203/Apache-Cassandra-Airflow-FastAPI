@@ -180,7 +180,13 @@ updates our tables
     
     Redis - key value store , in memory cache - will help with Celery
 
-    Run Redis using Docker (docker run -it --rm -p 6379:6379 redis)v - make sure to keep this running to stay connected with redis 
+    Run Redis using Docker (docker run -it --rm -p 6379:6379 redis)v - make sure to keep this running to stay connected with redis
+
+    In this case, we created a new port for Redis to be mapped on:
+
+    docker run -it --rm -p 6380:6380 redis --port 6380
+
+     You can check if it is working by pinging it - echo PING | nc 127.0.0.1 6380
 
     Once Redis is up, you can add the url to the .env file and configure it in config.py
 
@@ -197,3 +203,19 @@ updates our tables
 
 2:23 - https://www.youtube.com/watch?v=NyDT3KkscSk&t=6258s 
 
+Celery Signatures - a method of representing a task or a task invocation in a concise and portable manner. It is essentially a serialized representation of a Celery task or task invocation that can be passed around and executed by the Celery distributed task queue system. 
+
+Signatures are useful for decoupling the task executing from the task definition. They provide a convenient way to represent tasks as data objects, allowing you to store, manipulate, and pass them around within your application or between different components. 
+
+For here, we might consider using Apache Airlfow instead of Celery. 
+
+
+28. Set up web scraping
+    For this, we're using Selenium - it emulates a web browser.
+
+    We can get the page source from Amazon using Selenium
+
+    ~ Look back. atthis  ~
+
+29. We are just using simple requests library to scrape the website
+      
