@@ -11,7 +11,7 @@ and change a schema quickly according to the structure of your data. This allows
 
 This project also implemented views via FastAPI - a modern web framework for building APIs with Python that natively incorporates Pydantic. 
 
-Celery was also implemented for asynchronous task handling. In production, the NosSQL solution will be able to handle hundreds of automated data entries per second - and meets the criteria for scalability in terms of big data.
+Celery was also implemented for asynchronous task handling. In production, the NoSQL solution will be able to handle hundreds of automated data entries per second - and meets the criteria for scalability in terms of big data.
 
 A few screenshots of the final prject are shared below, including the web interface, Celery automation and database.
 <img width="1416" alt="Screenshot 2023-06-28 at 9 25 57 AM" src="https://github.com/jpa203/Apache-Cassandra-Airflow-FastAPI/assets/104007355/77a4dddb-1a7d-4467-aa3c-30385e437c4c">
