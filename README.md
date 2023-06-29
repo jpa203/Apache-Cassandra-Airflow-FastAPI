@@ -7,8 +7,8 @@ This project touches on a number of data engineering principles, including Data 
 web scraping and automation using Celery and Selenium.
 
 The main exercise of this project was understanding how to enforce data validation and schema-on-write using the Pydanitc library - an extension of Python's typing libray. With Pydantic, you are able to enforce 
-and change a schema quickly according to the structure of your data. This allows some flexibility with relational data and works. wellwith Cassandta, a column-oriented database optimized for fast queries and forgiving 
-toward redundancy and BASE properties. 
+and change a schema quickly according to the structure of your data. This allows some flexibility with relational data and works  well with Cassandra, a column-oriented database optimized for fast queries and  
+lenient toward redundancy and BASE properties. 
 
 This project also implemented views via FastAPI - a modern web framework for building APIs with Python that natively incorporates Pydantic. 
 
